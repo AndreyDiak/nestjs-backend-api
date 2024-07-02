@@ -15,7 +15,6 @@ export class UserService {
   }
 
   async findUser(id: string): Promise<User> {
-    console.log('id: ' + id);
     const user = await this.userModel.findById(id).exec();
 
     if (!user) {
