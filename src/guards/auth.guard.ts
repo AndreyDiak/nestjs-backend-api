@@ -22,7 +22,6 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    console.log({ isPublic });
     if (isPublic) {
       return true;
     }
@@ -46,7 +45,7 @@ export class AuthGuard implements CanActivate {
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] =
       (request.headers as any)?.authorization?.split(' ') ?? [];
-    console.log(request.headers);
+    console.log({ token, type });
     return type === 'Bearer' ? token : undefined;
   }
 }

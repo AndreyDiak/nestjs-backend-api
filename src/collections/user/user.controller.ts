@@ -23,28 +23,28 @@ export class UserController {
   @Public()
   @Post()
   create(@Body() body: CreateUserInput) {
-    return this.userService.createUser(body);
+    return this.userService.create(body);
   }
 
   // @Public()
   @Get('/list')
   getAll() {
-    return this.userService.listUser();
+    return this.userService.findAll();
   }
 
   @Get('/:id')
   findOne(@Param('id') id: string) {
-    return this.userService.findUserByID(id);
+    return this.userService.findOneByID(id);
   }
 
   @Put('/:id')
   updateOne(@Param('id') id: string, @Body() body: CreateUserInput) {
-    return this.userService.updateUser(id, body);
+    return this.userService.updateOne(id, body);
   }
 
   @Delete('/:id')
   @Roles(Role.Admin)
   deleteOne(@Param('id') id: string) {
-    return this.userService.deleteUser(id);
+    return this.userService.deleteOne(id);
   }
 }

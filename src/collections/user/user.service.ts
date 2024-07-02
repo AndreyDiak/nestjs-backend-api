@@ -9,13 +9,13 @@ import { User } from 'src/schemas/user.schema';
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async createUser(body: CreateUserInput): Promise<UserPayload> {
+  async create(body: CreateUserInput): Promise<UserPayload> {
     const createdUser = new this.userModel(body);
     const user = await createdUser.save();
     return user;
   }
 
-  async findUserByID(id: string): Promise<UserPayload> {
+  async findOneByID(id: string): Promise<UserPayload> {
     const user = await this.userModel.findById(id).exec();
 
     if (!user) {
@@ -24,28 +24,40 @@ export class UserService {
     return user;
   }
 
-  async findUserByUserName(username: string): Promise<UserPayload> {
+  async findOneByUsername(username: string): Promise<UserPayload> {
     const user = await this.userModel.findOne({
       userName: username,
     });
     if (!user) {
-      throw new NotFoundException(`User with username ${username} not found `);
+      throw new NotFoundException(
+        `User with username "${username}" not found `,
+      );
     }
     return user;
   }
 
-  async listUser(): Promise<UserPayload[]> {
+  async findOneByEmail(email: string): Promise<UserPayload> {
+    const user = await this.userModel.findOne({
+      email,
+    });
+    if (!user) {
+      throw new NotFoundException(`User with email "${email}" not found `);
+    }
+    return user;
+  }
+
+  async findAll(): Promise<UserPayload[]> {
     const users = await this.userModel.find();
     return users;
   }
 
-  async updateUser(id: string, body: UpdateUserInput): Promise<UserPayload> {
+  async updateOne(id: string, body: UpdateUserInput): Promise<UserPayload> {
     await this.userModel.updateOne({ _id: id }, body);
     const updatedUser = this.userModel.findById(id);
     return updatedUser;
   }
 
-  async deleteUser(id: string): Promise<void> {
+  async deleteOne(id: string): Promise<void> {
     await this.userModel.deleteOne({ _id: id });
   }
 }
