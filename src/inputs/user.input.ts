@@ -3,6 +3,9 @@ import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserInput {
   @IsString()
+  userName: string;
+
+  @IsString()
   fullName: string;
 
   @IsEmail()
