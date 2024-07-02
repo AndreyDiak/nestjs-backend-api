@@ -7,9 +7,9 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { Public } from 'src/entities/auth.decorator';
-import { Role } from 'src/entities/role.enum';
-import { Roles } from 'src/entities/roles.decorator';
+import { Public } from 'src/common/entities/auth.decorator';
+import { Role } from 'src/common/entities/role.enum';
+import { Roles } from 'src/common/entities/roles.decorator';
 import { CreateUserInput } from 'src/inputs/user.input';
 import { UserService } from './user.service';
 
@@ -26,7 +26,6 @@ export class UserController {
     return this.userService.create(body);
   }
 
-  // @Public()
   @Get('/list')
   getAll() {
     return this.userService.findAll();

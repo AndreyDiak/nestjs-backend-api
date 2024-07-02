@@ -1,8 +1,9 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
-  UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { CreateUserInput } from 'src/inputs/user.input';
@@ -11,43 +12,109 @@ import { UserService } from '../user/user.service';
 export class AuthService {
   constructor(
     private userService: UserService,
+    private configService: ConfigService,
     private jwtService: JwtService,
   ) {}
 
-  async signIn(
-    username: string,
-    pass: string,
-  ): Promise<{ access_token: string }> {
-    const user = await this.userService.findOneByUsername(username);
-    if (user?.password !== pass) {
-      throw new UnauthorizedException();
-    }
-    const payload = { sub: user._id!, username: user.userName };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
-  }
-
-  async signUp(body: CreateUserInput) {
+  async signUp(createUserInput: CreateUserInput) {
     try {
-      const candidate = this.userService.findOneByEmail(body.email);
+      const candidate = this.userService.findOneByEmail(createUserInput.email);
       if (candidate) {
         throw new BadRequestException('email already taken');
       }
     } catch {}
     try {
-      const candidate = this.userService.findOneByUsername(body.userName);
+      const candidate = this.userService.findOneByUsername(
+        createUserInput.userName,
+      );
       if (candidate) {
         throw new BadRequestException('username already taken');
       }
     } catch {}
 
-    const hashedPassword = await bcrypt.hash(body.password, 10);
+    const hashedPassword = await bcrypt.hash(createUserInput.password, 10);
     const newUser = {
-      ...body,
+      ...createUserInput,
       password: hashedPassword,
     };
     await this.userService.create(newUser);
-    return this.signIn(body.fullName, hashedPassword);
+    return this.signIn(createUserInput.fullName, hashedPassword);
+  }
+
+  async signIn(username: string, pass: string) {
+    const user = await this.userService.findOneByUsername(username);
+    if (!user) {
+      throw new BadRequestException('User does not exist');
+    }
+    const passwordMatches = await bcrypt.compare(user.password, pass);
+    if (!passwordMatches)
+      throw new BadRequestException('Password is incorrect');
+
+    const tokens = await this.getTokens(
+      user._id as unknown as string,
+      user.userName,
+    );
+    await this.updateRefreshToken(
+      user._id as unknown as string,
+      tokens.refreshToken,
+    );
+    return tokens;
+  }
+
+  async signOut(userID: string) {
+    return this.userService.updateOne(userID, { refreshToken: null });
+  }
+
+  async refreshTokens(userID: string, refreshToken: string) {
+    const user = await this.userService.findOneByID(userID);
+    if (!user || !user.refreshToken) {
+      throw new ForbiddenException('Access Denied');
+    }
+    const refreshTokenMatches = await bcrypt.compare(
+      refreshToken,
+      user.refreshToken,
+    );
+    if (!refreshTokenMatches) {
+      throw new ForbiddenException('Access Denied');
+    }
+    const tokens = await this.getTokens(userID, user.userName);
+    await this.updateRefreshToken(userID, tokens.refreshToken);
+    return tokens;
+  }
+
+  async updateRefreshToken(userID: string, refreshToken: string) {
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.userService.updateOne(userID, {
+      refreshToken: hashedRefreshToken,
+    });
+  }
+
+  async getTokens(userID: string, username: string) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          sub: userID,
+          username,
+        },
+        {
+          secret: this.configService.get('JWT_ACCESS_SECRET'),
+          expiresIn: '15m',
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          sub: userID,
+          username,
+        },
+        {
+          secret: this.configService.get('JWT_REFRESH_SECRET'),
+          expiresIn: '7d',
+        },
+      ),
+    ]);
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 }

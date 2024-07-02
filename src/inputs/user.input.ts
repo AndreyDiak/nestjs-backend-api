@@ -1,5 +1,5 @@
-import { OmitType } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { OmitType, PartialType } from '@nestjs/swagger';
+import { IsArray, IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserInput {
   @IsString()
@@ -15,10 +15,19 @@ export class CreateUserInput {
   @IsOptional()
   bio: string;
 
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags: string[];
+
+  @IsString()
+  @IsOptional()
+  refreshToken: string;
+
   @IsString()
   password: string;
 }
 
-export class UpdateUserInput extends OmitType(CreateUserInput, [
+export class UpdateUserInput extends OmitType(PartialType(CreateUserInput), [
   'password',
 ] as const) {}
