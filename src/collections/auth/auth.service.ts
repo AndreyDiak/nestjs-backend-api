@@ -17,20 +17,18 @@ export class AuthService {
   ) {}
 
   async signUp(createUserInput: CreateUserInput) {
-    try {
-      const candidate = this.userService.findOneByEmail(createUserInput.email);
-      if (candidate) {
-        throw new BadRequestException('email already taken');
-      }
-    } catch {}
-    try {
-      const candidate = this.userService.findOneByUsername(
-        createUserInput.userName,
-      );
-      if (candidate) {
-        throw new BadRequestException('username already taken');
-      }
-    } catch {}
+    const candidateWithEmail = await this.userService.findOneByEmail(
+      createUserInput.email,
+    );
+    if (candidateWithEmail) {
+      throw new BadRequestException('email already taken');
+    }
+    const candidateWithUsername = await this.userService.findOneByUsername(
+      createUserInput.userName,
+    );
+    if (candidateWithUsername) {
+      throw new BadRequestException('username already taken');
+    }
 
     const hashedPassword = await bcrypt.hash(createUserInput.password, 10);
     const newUser = {
@@ -38,7 +36,7 @@ export class AuthService {
       password: hashedPassword,
     };
     await this.userService.create(newUser);
-    return this.signIn(createUserInput.fullName, hashedPassword);
+    return this.signIn(createUserInput.userName, createUserInput.password);
   }
 
   async signIn(username: string, pass: string) {
@@ -46,7 +44,7 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException('User does not exist');
     }
-    const passwordMatches = await bcrypt.compare(user.password, pass);
+    const passwordMatches = await bcrypt.compare(pass, user.password);
     if (!passwordMatches)
       throw new BadRequestException('Password is incorrect');
 
