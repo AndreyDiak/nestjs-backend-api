@@ -40,6 +40,7 @@ export class UserService {
   }
 
   async updateOne(id: string, body: UpdateUserInput): Promise<UserPayload> {
+    console.log({ body });
     await this.userModel.updateOne({ _id: id }, body);
     const updatedUser = this.userModel.findById(id);
     return updatedUser;

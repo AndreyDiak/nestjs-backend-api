@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 import { CreateUserInput } from 'src/inputs/user.input';
 import { UserService } from '../user/user.service';
 @Injectable()
@@ -30,7 +30,7 @@ export class AuthService {
       throw new BadRequestException('username already taken');
     }
 
-    const hashedPassword = await bcrypt.hash(createUserInput.password, 10);
+    const hashedPassword = await argon2.hash(createUserInput.password);
     const newUser = {
       ...createUserInput,
       password: hashedPassword,
@@ -44,7 +44,7 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException('User does not exist');
     }
-    const passwordMatches = await bcrypt.compare(pass, user.password);
+    const passwordMatches = await argon2.verify(user.password, pass);
     if (!passwordMatches)
       throw new BadRequestException('Password is incorrect');
 
@@ -68,9 +68,10 @@ export class AuthService {
     if (!user || !user.refreshToken) {
       throw new ForbiddenException('Access Denied');
     }
-    const refreshTokenMatches = await bcrypt.compare(
-      refreshToken,
+    console.log({ refreshToken, hashed: user.refreshToken });
+    const refreshTokenMatches = await argon2.verify(
       user.refreshToken,
+      refreshToken,
     );
     if (!refreshTokenMatches) {
       throw new ForbiddenException('Access Denied');
@@ -81,7 +82,7 @@ export class AuthService {
   }
 
   async updateRefreshToken(userID: string, refreshToken: string) {
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    const hashedRefreshToken = await argon2.hash(refreshToken);
     await this.userService.updateOne(userID, {
       refreshToken: hashedRefreshToken,
     });
