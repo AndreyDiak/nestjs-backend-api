@@ -35,12 +35,13 @@ export class UserService {
   }
 
   async findAll(): Promise<UserPayload[]> {
-    const users = await this.userModel.find();
+    const users = await this.userModel.find({
+      $where: '',
+    });
     return users;
   }
 
   async updateOne(id: string, body: UpdateUserInput): Promise<UserPayload> {
-    console.log({ body });
     await this.userModel.updateOne({ _id: id }, body);
     const updatedUser = this.userModel.findById(id);
     return updatedUser;

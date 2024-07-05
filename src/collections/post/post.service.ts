@@ -8,9 +8,16 @@ import { Post } from 'src/schemas/post.schema';
 export class PostService {
   constructor(@InjectModel(Post.name) private postModel: Model<Post>) {}
 
-  async createPost(body: CreatePostInput): Promise<Post> {
-    const createdPost = new this.postModel(body);
+  async createPost(body: CreatePostInput, userId: string): Promise<Post> {
+    const createdPost = new this.postModel({
+      ...body,
+      authorId: userId,
+    });
     const post = await createdPost.save();
     return post;
+  }
+
+  async findAll(): Promise<Post[]> {
+    return this.postModel.find();
   }
 }
