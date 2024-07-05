@@ -16,6 +16,12 @@ export class PostService {
     const post = await createdPost.save();
     return post;
   }
+  async findOne(postId: string) {
+    const post = this.postModel.findById(postId);
+    if (!post) {
+    }
+    return post;
+  }
 
   async findAll(): Promise<Post[]> {
     return this.postModel.find();

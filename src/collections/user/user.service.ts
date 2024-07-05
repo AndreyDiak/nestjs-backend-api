@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateUserInput, UpdateUserInput } from 'src/inputs/user.input';
@@ -17,6 +17,9 @@ export class UserService {
 
   async findOneByID(id: string): Promise<UserPayload> {
     const user = await this.userModel.findById(id).exec();
+    if (!user) {
+      throw new NotFoundException(`User with id:${id} not found `);
+    }
     return user;
   }
 
@@ -24,6 +27,9 @@ export class UserService {
     const user = await this.userModel.findOne({
       userName: username,
     });
+    if (!user) {
+      throw new NotFoundException(`User with username:${username} not found `);
+    }
     return user;
   }
 
@@ -31,13 +37,14 @@ export class UserService {
     const user = await this.userModel.findOne({
       email,
     });
+    if (!user) {
+      throw new NotFoundException(`User with email:${email} not found `);
+    }
     return user;
   }
 
   async findAll(): Promise<UserPayload[]> {
-    const users = await this.userModel.find({
-      $where: '',
-    });
+    const users = await this.userModel.find();
     return users;
   }
 

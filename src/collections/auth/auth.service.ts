@@ -17,18 +17,22 @@ export class AuthService {
   ) {}
 
   async signUp(createUserInput: CreateUserInput) {
-    const candidateWithEmail = await this.userService.findOneByEmail(
-      createUserInput.email,
-    );
-    if (candidateWithEmail) {
-      throw new BadRequestException('email already taken');
-    }
-    const candidateWithUsername = await this.userService.findOneByUsername(
-      createUserInput.userName,
-    );
-    if (candidateWithUsername) {
-      throw new BadRequestException('username already taken');
-    }
+    try {
+      const candidate = await this.userService.findOneByEmail(
+        createUserInput.email,
+      );
+      if (candidate) {
+        throw new BadRequestException('email already taken');
+      }
+    } catch {}
+    try {
+      const candidate = await this.userService.findOneByUsername(
+        createUserInput.userName,
+      );
+      if (candidate) {
+        throw new BadRequestException('username already taken');
+      }
+    } catch {}
 
     const hashedPassword = await argon2.hash(createUserInput.password);
     const newUser = {
@@ -40,23 +44,24 @@ export class AuthService {
   }
 
   async signIn(username: string, pass: string) {
-    const user = await this.userService.findOneByUsername(username);
-    if (!user) {
+    try {
+      const user = await this.userService.findOneByUsername(username);
+      const passwordMatches = await argon2.verify(user.password, pass);
+      if (!passwordMatches)
+        throw new BadRequestException('Password is incorrect');
+
+      const tokens = await this.getTokens(
+        user._id as unknown as string,
+        user.userName,
+      );
+      await this.updateRefreshToken(
+        user._id as unknown as string,
+        tokens.refreshToken,
+      );
+      return tokens;
+    } catch {
       throw new BadRequestException('User does not exist');
     }
-    const passwordMatches = await argon2.verify(user.password, pass);
-    if (!passwordMatches)
-      throw new BadRequestException('Password is incorrect');
-
-    const tokens = await this.getTokens(
-      user._id as unknown as string,
-      user.userName,
-    );
-    await this.updateRefreshToken(
-      user._id as unknown as string,
-      tokens.refreshToken,
-    );
-    return tokens;
   }
 
   async signOut(userID: string) {
