@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Role } from 'src/common/entities/role.enum';
 import { Roles } from 'src/common/entities/roles.decorator';
-import { CreateUserInput } from 'src/inputs/user.input';
+import { CreateUserInput, UpdateUserInput } from 'src/inputs/user.input';
 import { UserService } from './user.service';
 
 @Controller({
@@ -35,7 +35,7 @@ export class UserController {
   }
 
   @Put('/:id')
-  updateOne(@Param('id') id: string, @Body() body: CreateUserInput) {
+  updateOne(@Param('id') id: string, @Body() body: UpdateUserInput) {
     return this.userService.updateOne(id, body);
   }
 

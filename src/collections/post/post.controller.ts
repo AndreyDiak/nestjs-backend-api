@@ -1,7 +1,16 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { JwtPayload } from 'src/common/strategies/accessToken.strategy';
-import { CreatePostInput } from 'src/inputs/post.input';
+import { CreatePostInput, UpdatePostInput } from 'src/inputs/post.input';
 import { PostService } from './post.service';
 
 @Controller({
@@ -18,11 +27,22 @@ export class PostController {
     @Req() req: Request & { user: JwtPayload },
   ) {
     const userId = req.user.sub;
-    return this.postService.createPost(body, userId);
+    return this.postService.create(body, userId);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Put('/:id')
+  updateOne(@Param('id') id: string, @Body() body: UpdatePostInput) {
+    return this.postService.updateOne(id, body);
   }
 
   @Get('list')
   getAll() {
     return this.postService.findAll();
+  }
+
+  @Get('/:id')
+  findOne(@Param('id') id: string) {
+    return this.findOne(id);
   }
 }

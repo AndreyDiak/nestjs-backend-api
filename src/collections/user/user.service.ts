@@ -15,10 +15,10 @@ export class UserService {
     return user;
   }
 
-  async findOneByID(id: string): Promise<UserPayload> {
-    const user = await this.userModel.findById(id).exec();
+  async findOneByID(userId: string): Promise<UserPayload> {
+    const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new NotFoundException(`User with id:${id} not found `);
+      throw new NotFoundException(`User with id:${userId} not found `);
     }
     return user;
   }

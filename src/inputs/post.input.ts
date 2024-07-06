@@ -14,6 +14,6 @@ export class CreatePostInput {
   tags: string[];
 }
 
-export class UpdateUserInput extends OmitType(CreatePostInput, [
+export class UpdatePostInput extends OmitType(CreatePostInput, [
   'title',
 ] as const) {}
