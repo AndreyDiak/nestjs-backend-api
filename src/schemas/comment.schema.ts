@@ -16,6 +16,9 @@ export class Comment {
 
   @Prop()
   postId: string;
+
+  @Prop()
+  edited: boolean;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

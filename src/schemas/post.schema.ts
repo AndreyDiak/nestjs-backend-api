@@ -15,6 +15,9 @@ export class Post {
   tags: string[];
 
   @Prop()
+  edited: boolean;
+
+  @Prop()
   authorId: string;
 }
 

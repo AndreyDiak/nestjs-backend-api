@@ -1,3 +1,4 @@
+import { OmitType, PartialType } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
 export class CreateCommentInput {
@@ -10,3 +11,8 @@ export class CreateCommentInput {
   @IsString()
   postId: string;
 }
+
+export class UpdateCommentInput extends OmitType(
+  PartialType(CreateCommentInput),
+  ['postId', 'authorId'] as const,
+) {}
