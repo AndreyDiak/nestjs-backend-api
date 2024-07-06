@@ -13,8 +13,14 @@ export class CommentService {
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
   ) {}
 
-  async create(body: CreateCommentInput): Promise<CommentPayload> {
-    const createdComment = new this.commentModel(body);
+  async create(
+    body: CreateCommentInput,
+    authorId: string,
+  ): Promise<CommentPayload> {
+    const createdComment = new this.commentModel({
+      ...body,
+      authorId,
+    });
     const comment = await createdComment.save();
     return comment;
   }

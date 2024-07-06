@@ -29,10 +29,7 @@ export class CommentController {
     @Req() req: Request & { user: JwtPayload },
   ) {
     const userId = req.user.sub;
-    return this.commentService.create({
-      ...body,
-      authorId: userId,
-    });
+    return this.commentService.create(body, userId);
   }
 
   @UseGuards(AccessTokenGuard)
