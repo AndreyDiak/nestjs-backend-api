@@ -15,7 +15,10 @@ import {
 } from 'src/inputs/comment.input';
 import { CommentService } from './comment.service';
 
-@Controller('comment')
+@Controller({
+  path: 'comments',
+  version: '1',
+})
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
@@ -37,9 +40,4 @@ export class CommentController {
   updateOne(@Param('id') id: string, @Body() body: UpdateCommentInput) {
     return this.commentService.updateOne(id, body);
   }
-
-  // @Get('/:id')
-  // findOne(@Param('id') id: string) {
-  //   return this.findOne(id);
-  // }
 }
