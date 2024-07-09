@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -34,6 +35,12 @@ export class PostController {
   @Put('/:id')
   updateOne(@Param('id') id: string, @Body() body: UpdatePostInput) {
     return this.postService.updateOne(id, body);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Delete('/:id')
+  deleteOne(@Param('id') id: string) {
+    return this.postService.deleteOne(id);
   }
 
   @Get('list')

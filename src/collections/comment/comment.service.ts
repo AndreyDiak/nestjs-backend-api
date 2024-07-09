@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import {
   CreateCommentInput,
   UpdateCommentInput,
@@ -33,6 +33,11 @@ export class CommentService {
     return post;
   }
 
+  async findByFilter(filter: FilterQuery<Comment>): Promise<CommentPayload[]> {
+    const comments = this.commentModel.find(filter);
+    return comments;
+  }
+
   async updateOne(
     commentId: string,
     body: UpdateCommentInput,
@@ -40,5 +45,17 @@ export class CommentService {
     await this.commentModel.updateOne({ _id: commentId }, body);
     const updatedComment = this.findOne(commentId);
     return updatedComment;
+  }
+
+  async deleteOne(commentId: string) {
+    await this.commentModel.deleteOne({ _id: commentId });
+  }
+
+  async deleteMany(commentIds: Types.ObjectId[]) {
+    await this.commentModel.deleteMany({
+      _id: {
+        $in: commentIds,
+      },
+    });
   }
 }
