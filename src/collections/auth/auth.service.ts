@@ -27,7 +27,7 @@ export class AuthService {
     } catch {}
     try {
       const candidate = await this.userService.findOneByUsername(
-        createUserInput.userName,
+        createUserInput.username,
       );
       if (candidate) {
         throw new BadRequestException('username already taken');
@@ -40,7 +40,7 @@ export class AuthService {
       password: hashedPassword,
     };
     await this.userService.create(newUser);
-    return this.signIn(createUserInput.userName, createUserInput.password);
+    return this.signIn(createUserInput.username, createUserInput.password);
   }
 
   async signIn(username: string, pass: string) {
@@ -65,7 +65,7 @@ export class AuthService {
   }
 
   async signOut(userID: string) {
-    return this.userService.updateOne(userID, { refreshToken: null });
+    return this.userService.updateOne(userID, { refresh_token: null });
   }
 
   async refreshTokens(userID: string, refreshToken: string) {
@@ -85,10 +85,10 @@ export class AuthService {
     return tokens;
   }
 
-  async updateRefreshToken(userID: string, refreshToken: string) {
-    const hashedRefreshToken = await argon2.hash(refreshToken);
+  async updateRefreshToken(userID: string, refresh_token: string) {
+    const hashedrefresh_token = await argon2.hash(refresh_token);
     await this.userService.updateOne(userID, {
-      refreshToken: hashedRefreshToken,
+      refresh_token: hashedrefresh_token,
     });
   }
 
