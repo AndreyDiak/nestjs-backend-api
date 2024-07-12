@@ -6,10 +6,10 @@ export class CreateCommentInput {
   text: string;
 
   @IsString()
-  post_id: string;
+  postId: string;
 }
 
 export class UpdateCommentInput extends OmitType(
   PartialType(CreateCommentInput),
-  ['post_id'] as const,
+  ['postId'] as const,
 ) {}
