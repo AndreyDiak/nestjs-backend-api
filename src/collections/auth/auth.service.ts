@@ -27,7 +27,7 @@ export class AuthService {
     } catch {}
     try {
       const candidate = await this.userService.findOneByUsername(
-        createUserInput.userName,
+        createUserInput.username,
       );
       if (candidate) {
         throw new BadRequestException('username already taken');
@@ -40,7 +40,7 @@ export class AuthService {
       password: hashedPassword,
     };
     await this.userService.create(newUser);
-    return this.signIn(createUserInput.userName, createUserInput.password);
+    return this.signIn(createUserInput.username, createUserInput.password);
   }
 
   async signIn(username: string, pass: string) {
@@ -54,7 +54,7 @@ export class AuthService {
         user._id as unknown as string,
         user.userName,
       );
-      await this.updateRefreshToken(
+      await this.updaterefresh_token(
         user._id as unknown as string,
         tokens.refreshToken,
       );
@@ -65,7 +65,7 @@ export class AuthService {
   }
 
   async signOut(userID: string) {
-    return this.userService.updateOne(userID, { refreshToken: null });
+    return this.userService.updateOne(userID, { refresh_token: null });
   }
 
   async refreshTokens(userID: string, refreshToken: string) {
@@ -73,23 +73,22 @@ export class AuthService {
     if (!user || !user.refreshToken) {
       throw new ForbiddenException('Access Denied');
     }
-    console.log({ refreshToken, hashed: user.refreshToken });
-    const refreshTokenMatches = await argon2.verify(
+    const refresh_tokenMatches = await argon2.verify(
       user.refreshToken,
       refreshToken,
     );
-    if (!refreshTokenMatches) {
+    if (!refresh_tokenMatches) {
       throw new ForbiddenException('Access Denied');
     }
     const tokens = await this.getTokens(userID, user.userName);
-    await this.updateRefreshToken(userID, tokens.refreshToken);
+    await this.updaterefresh_token(userID, tokens.refreshToken);
     return tokens;
   }
 
-  async updateRefreshToken(userID: string, refreshToken: string) {
-    const hashedRefreshToken = await argon2.hash(refreshToken);
+  async updaterefresh_token(userID: string, refresh_token: string) {
+    const hashedrefresh_token = await argon2.hash(refresh_token);
     await this.userService.updateOne(userID, {
-      refreshToken: hashedRefreshToken,
+      refresh_token: hashedrefresh_token,
     });
   }
 

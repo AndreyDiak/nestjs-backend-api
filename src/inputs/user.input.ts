@@ -3,10 +3,10 @@ import { IsArray, IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserInput {
   @IsString()
-  userName: string;
+  username: string;
 
   @IsString()
-  fullName: string;
+  fullname: string;
 
   @IsEmail()
   email: string;
@@ -22,7 +22,7 @@ export class CreateUserInput {
 
   @IsString()
   @IsOptional()
-  refreshToken: string;
+  refresh_token: string;
 
   @IsString()
   password: string;
